@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using ToDoList.Models;
 using System;
+using MySql.Data.MySqlClient;
 
 namespace ToDoList.Tests
 {
@@ -12,6 +13,11 @@ namespace ToDoList.Tests
     public void Dispose()
     {
       Item.ClearAll();
+    }
+
+    public void ItemTest()
+    {
+      DBConfiguration.ConnectionString = "server=localhost;user id=root;password=epicodus;port=3306;database=to_do_list_test;";
     }
 
     [TestMethod]
@@ -52,15 +58,15 @@ namespace ToDoList.Tests
     }
 
     [TestMethod]
-    public void GetAll_ReturnsEmptyList_ItemList()
+    public void GetAll_ReturnsEmptyListFromDatabase_ItemList()
     {
-      // Arrange
+      //Arrange
       List<Item> newList = new List<Item> { };
 
-      // Act
+      //Act
       List<Item> result = Item.GetAll();
 
-      // Assert
+      //Assert
       CollectionAssert.AreEqual(newList, result);
     }
 
@@ -71,7 +77,9 @@ namespace ToDoList.Tests
       string description01 = "Walk the dog";
       string description02 = "Wash the dishes";
       Item newItem1 = new Item(description01);
+      newItem1.Save();
       Item newItem2 = new Item(description02);
+      newItem2.Save();
       List<Item> newList = new List<Item> { newItem1, newItem2 };
 
       //Act
@@ -82,33 +90,33 @@ namespace ToDoList.Tests
     }
 
     [TestMethod]
-    public void GetId_ItemsInstantiateWithAnIdAndGetterReturns_Int()
+    public void Find_ReturnsCorrectItemFromDatabase_Item()
     {
       //Arrange
-      string description = "Walk the dog.";
-      Item newItem = new Item(description);
+      Item newItem = new Item("Mow the lawn");
+      newItem.Save();
+      Item newItem2 = new Item("Wash dishes");
+      newItem2.Save();
 
       //Act
-      int result = newItem.Id;
-
+      Item foundItem = Item.Find(newItem.Id);
       //Assert
-      Assert.AreEqual(1, result);
+      Assert.AreEqual(newItem, foundItem);
     }
 
     [TestMethod]
-    public void Find_ReturnsCorrectItem_Item()
+    public void Save_SavesToDatabase_ItemList()
     {
       //Arrange
-      string description01 = "Walk the dog";
-      string description02 = "Wash the dishes";
-      Item newItem1 = new Item(description01);
-      Item newItem2 = new Item(description02);
+      Item testItem = new Item("Mow the lawn");
 
       //Act
-      Item result = Item.Find(2);
+      testItem.Save();
+      List<Item> result = Item.GetAll();
+      List<Item> testList = new List<Item>{testItem};
 
       //Assert
-      Assert.AreEqual(newItem2, result);
+      CollectionAssert.AreEqual(testList, result);
     }
   }
 }
